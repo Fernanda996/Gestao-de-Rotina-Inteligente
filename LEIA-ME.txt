@@ -1,0 +1,8 @@
+ROTINA DX — VERSÃO PÚBLICA E ANONIMIZADA
+
+Todos os nomes de pessoas, projetos, indicadores, reuniões e unidades são fictícios.
+Não há referência a empresas, operações ou dados reais.
+
+Para publicar:
+- Extraia o ZIP.
+- Envie a pasta ou o arquivo index.html a uma hospedagem estática.
