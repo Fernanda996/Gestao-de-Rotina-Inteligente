@@ -1,0 +1,16 @@
+ROTINA DX — VERSÃO VISUAL E AUTOEXPLICATIVA
+
+Ajustes:
+- removidos “Filtro global” e “Escopo aplicado” das telas;
+- removido “Protótipo acadêmico” do topo;
+- aviso acadêmico mantido apenas em Sobre o projeto;
+- aba renomeada para Atas & Combinados;
+- fluxo visual Ata → Decisão → Combinado → Responsável/Prazo → Kanban;
+- KPIs de reuniões, combinados abertos, atrasados e concluídos;
+- textos das abas reduzidos;
+- “Combinado crítico da ata” em evidência;
+- resultado de cada reunião resumido visualmente.
+
+Para atualizar:
+substitua somente o index.html no GitHub e faça o commit.
+Depois abra com ?v=40 ou use Ctrl+F5.

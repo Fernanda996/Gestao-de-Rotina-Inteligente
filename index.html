@@ -1,0 +1,1397 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b1f33" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Rotina DX — Gestão de Rotina Inteligente</title>
+  <style>
+    :root{
+      --navy:#071b2d;
+      --navy-2:#0c263e;
+      --blue:#2f7df6;
+      --blue-2:#7aaeff;
+      --cyan:#dbe9ff;
+      --paper:#f4f7fb;
+      --card:#ffffff;
+      --text:#10243a;
+      --muted:#65768a;
+      --line:#dbe3ee;
+      --good:#279b83;
+      --violet:#7657e6;
+      --teal:#22a6a1;
+      --rose:#c95773;
+      --bad:#c95773;
+      --shadow:0 16px 42px rgba(12,38,62,.10);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:Calibri,Arial,sans-serif;background:var(--paper);color:var(--text)}
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    .app{min-height:100vh;display:grid;grid-template-columns:260px 1fr}
+    .sidebar{
+      background:linear-gradient(180deg,var(--navy),#061523);
+      color:#fff;padding:22px 16px;display:flex;flex-direction:column;gap:24px;
+      position:sticky;top:0;height:100vh;z-index:20
+    }
+    .brand{display:flex;align-items:center;gap:12px;padding:6px 8px 18px}
+    .brand-mark{
+      width:46px;height:46px;border:2px solid var(--blue-2);border-radius:16px;
+      display:grid;place-items:center;font-weight:700;letter-spacing:-2px;
+      box-shadow:inset 0 0 0 4px rgba(47,125,246,.13)
+    }
+    .brand h1{font-size:18px;margin:0}.brand p{font-size:12px;color:#a8bdd3;margin:2px 0 0}
+    .nav{display:grid;gap:8px}
+    .nav button{
+      border:0;background:transparent;color:#b7c8d9;border-radius:14px;padding:13px 14px;
+      display:flex;align-items:center;gap:12px;text-align:left;transition:.2s
+    }
+    .nav button:hover{background:rgba(255,255,255,.06);color:#fff}
+    .nav button.active{background:linear-gradient(90deg,rgba(47,125,246,.25),rgba(47,125,246,.08));color:#fff;border:1px solid rgba(122,174,255,.18)}
+    .nav svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8}
+    .side-card{margin-top:auto;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);border-radius:18px;padding:15px}
+    .side-card small{display:block;color:#9fb4ca;margin-bottom:7px}
+    .side-card strong{font-size:14px}.side-card p{font-size:12px;color:#b9c8d7;line-height:1.4}
+    .side-card button{
+      width:100%;border:1px solid rgba(122,174,255,.35);border-radius:12px;
+      background:linear-gradient(90deg,#2f7df6,#7657e6);color:#fff;font-weight:700;padding:10px
+    }
+    main{min-width:0}
+    .topbar{
+      height:76px;background:rgba(244,247,251,.88);backdrop-filter:blur(18px);
+      border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;
+      padding:0 28px;position:sticky;top:0;z-index:15
+    }
+    .crumb strong{font-size:17px}
+    .top-actions{display:flex;gap:10px;align-items:center}
+    .filter,.ghost,.primary{
+      border-radius:12px;padding:10px 13px;border:1px solid var(--line);background:#fff;color:var(--text)
+    }
+    .primary{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:700}
+    .ghost:hover,.filter:hover{border-color:#9bbef7}
+    .content{padding:26px 28px 50px;max-width:1500px;margin:auto}
+    .page{display:none}.page.active{display:block}
+    .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:22px}
+    .page-head h2{margin:0;font-size:30px;letter-spacing:-.6px}.page-head p{margin:7px 0 0;color:var(--muted)}
+    .badge{display:inline-flex;gap:7px;align-items:center;border-radius:999px;background:#eaf2ff;color:#1f62cf;padding:7px 11px;font-size:12px;font-weight:700}
+    .grid{display:grid;gap:16px}
+    .kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:18px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .kpi{padding:20px;position:relative;overflow:hidden}
+    .kpi::after{content:"";position:absolute;width:80px;height:80px;border-radius:50%;right:-28px;top:-30px;background:rgba(47,125,246,.09)}
+    .kpi small{color:var(--muted)}.kpi strong{font-size:29px;display:block;margin:10px 0 4px}.kpi span{font-size:12px;color:var(--good)}
+    .two{grid-template-columns:1.25fr .75fr}
+    .panel{padding:20px}.panel h3{font-size:17px;margin:0 0 4px}.panel .sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+    .capacity-row{display:grid;grid-template-columns:150px 1fr 70px;align-items:center;gap:12px;margin:13px 0}
+    .bar{height:10px;background:#edf1f6;border-radius:999px;overflow:hidden}.bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),#70a7ff)}
+    .capacity-row b{text-align:right;font-size:13px}.capacity-row span{font-size:13px}
+    .initiative-list{display:grid;gap:11px}
+    .initiative{border:1px solid var(--line);border-radius:15px;padding:14px;display:flex;justify-content:space-between;gap:14px;align-items:center}
+    .initiative h4{margin:0 0 4px;font-size:14px}.initiative p{margin:0;color:var(--muted);font-size:12px}
+    .pill{font-size:11px;border-radius:999px;padding:6px 9px;background:#eef4ff;color:#3268b8;white-space:nowrap}
+    .pill.warn{background:#fdebf0;color:#a63d59}.pill.good{background:#e3f7f2;color:#247765}
+    .team-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .person{padding:18px;transition:.2s}.person:hover{transform:translateY(-3px);border-color:#9fbeef}
+    .person-head{display:flex;gap:12px;align-items:center}
+    .avatar{width:45px;height:45px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;background:linear-gradient(135deg,#2f7df6,#754de8)}
+    .person h3{margin:0;font-size:15px}.person small{color:var(--muted)}
+    .person-metrics{display:flex;justify-content:space-between;margin:16px 0 8px;font-size:12px}
+    .person .tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:13px}
+    .tag{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:11px;background:#fbfcfe}
+    .agenda-layout{grid-template-columns:340px 1fr}
+    .date-list{padding:14px}
+    .date-item{padding:13px;border-radius:13px;display:flex;justify-content:space-between;align-items:center;margin:4px 0}
+    .date-item.active{background:#eaf2ff;color:#1f62cf}.date-item:hover{background:#f3f6fa}
+    .meetings{padding:20px}
+    .meeting{border-left:4px solid var(--blue);padding:14px 15px;background:#f8faff;border-radius:0 14px 14px 0;margin-bottom:13px}
+    .meeting h4{margin:0 0 6px}.meeting p{margin:0;color:var(--muted);font-size:12px}
+    .insights-layout{grid-template-columns:340px 1fr}
+    .meeting-menu{padding:14px}.meeting-btn{width:100%;border:0;background:transparent;text-align:left;padding:13px;border-radius:13px;margin-bottom:5px}
+    .meeting-btn.active{
+      background:linear-gradient(90deg,#edf4ff,#f0edff);
+      border:1px solid #afc9f7;color:#163d73
+    }
+    .meeting-btn b{display:block}.meeting-btn span{color:var(--muted);font-size:11px}
+    .tabs{display:flex;gap:8px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:18px}
+    .tab{border:0;background:#f3f6fa;border-radius:10px;padding:9px 14px;color:var(--muted)}
+    .tab.active{background:#e8f1ff;color:#1f62cf;font-weight:700}
+    .tab-content{display:none}.tab-content.active{display:block}
+    .decision-grid{grid-template-columns:1fr 1fr;margin-top:18px}
+    .decision{border:1px solid var(--line);border-radius:15px;padding:15px}.decision h4{margin:0 0 9px}
+    .checklist{display:grid;gap:9px}.check{display:flex;gap:10px;align-items:flex-start;font-size:13px}.dot{width:18px;height:18px;border:2px solid var(--good);border-radius:50%;flex:none;margin-top:1px}
+    .gov-top{padding:20px;margin-bottom:17px}.bets{grid-template-columns:repeat(2,1fr)}.bet{border:1px solid var(--line);border-radius:15px;padding:15px}.bet h4{margin:0 0 7px}.bet p{margin:0;color:var(--muted);font-size:12px}
+    .accordion{display:grid;gap:10px}
+    .acc{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+    .acc-head{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+    .acc-head h4{margin:0}.acc-head p{margin:4px 0 0;color:var(--muted);font-size:12px}
+    .acc-body{display:none;padding:0 18px 18px}.acc.open .acc-body{display:block}.acc.open .chev{transform:rotate(180deg)}
+    .resource-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}.resource-links button{border:1px solid var(--line);background:#f8fafc;border-radius:9px;padding:7px 9px;font-size:11px}
+    .empty{padding:34px;text-align:center;color:var(--muted)}
+    .modal-back{position:fixed;inset:0;background:rgba(3,15,27,.55);z-index:50;display:none;place-items:center;padding:20px}
+    .modal-back.open{display:grid}.modal{max-width:620px;width:100%;background:#fff;border-radius:24px;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.25)}
+    .modal h3{margin-top:0}.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+
+    .flow-panel{margin-top:18px;padding:20px}
+    .flow-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:16px}
+    .flow-head h3{margin:0 0 4px;font-size:18px}
+    .flow-head p{margin:0;color:var(--muted);font-size:12px}
+    .flow-tip{font-size:11px;color:#526a84;background:#edf4ff;border:1px solid #d3e3fb;border-radius:999px;padding:7px 10px;white-space:nowrap}
+    .action-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+    .action-kpi{border:1px solid var(--line);border-radius:15px;padding:12px 14px;background:#fbfcff}
+    .action-kpi small{display:block;color:var(--muted);font-size:11px}
+    .action-kpi strong{display:block;font-size:20px;margin-top:5px}
+    .kanban-wrap{overflow-x:auto;padding-bottom:6px}
+    .kanban{display:grid;grid-template-columns:repeat(5,minmax(220px,1fr));gap:12px;min-width:1160px}
+    .kanban-col{background:#f4f7fb;border:1px solid var(--line);border-radius:17px;padding:11px;min-height:290px}
+    .kanban-col.drag-over{border-color:var(--violet);box-shadow:inset 0 0 0 2px rgba(118,87,230,.12)}
+    .kanban-col-head{display:flex;justify-content:space-between;align-items:center;padding:4px 4px 10px}
+    .kanban-col-head h4{margin:0;font-size:13px}
+    .kanban-count{width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:#e7eef8;color:#45617d;font-size:11px;font-weight:700}
+    .action-card{
+      background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px;margin-bottom:9px;
+      box-shadow:0 7px 18px rgba(12,38,62,.06);cursor:grab;transition:.18s
+    }
+    .action-card:hover{transform:translateY(-2px);border-color:#9dbbf0}
+    .action-card:active{cursor:grabbing}
+    .action-card h5{font-size:13px;margin:0 0 7px;line-height:1.3}
+    .action-card p{font-size:11px;color:var(--muted);margin:0 0 10px}
+    .action-meta{display:flex;justify-content:space-between;gap:8px;align-items:center}
+    .action-owner{display:flex;align-items:center;gap:6px;font-size:10px;color:#455c74}
+    .mini-avatar{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:8px;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--violet))}
+    .priority{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:5px 7px;border-radius:999px}
+    .priority.high{background:#fdebf0;color:#a63d59}
+    .priority.medium{background:#eeeafd;color:#5e48bb}
+    .priority.low{background:#e3f7f2;color:#247765}
+    .due{font-size:10px;color:var(--muted);margin-top:9px;display:flex;justify-content:space-between}
+    .due .late{color:var(--rose);font-weight:700}
+    .about-list{display:grid;gap:10px;margin:16px 0}
+    .about-item{border:1px solid var(--line);border-radius:14px;padding:13px;background:#f8faff}
+    .about-item b{display:block;margin-bottom:4px;font-size:13px}
+    .about-item span{font-size:12px;color:var(--muted);line-height:1.45}
+
+
+    .value-summary{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:18px}
+    .value-kpi{padding:18px}
+    .value-kpi small{display:block;color:var(--muted);font-size:11px}
+    .value-kpi strong{display:block;font-size:25px;margin:8px 0 3px}
+    .value-kpi span{font-size:11px;color:var(--muted)}
+    .value-layout{grid-template-columns:1.25fr .75fr;align-items:start}
+    .value-list{display:grid;gap:13px}
+    .value-item{border:1px solid var(--line);border-radius:18px;background:#fff;padding:17px;box-shadow:0 10px 26px rgba(12,38,62,.06)}
+    .value-item-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}
+    .value-item h4{margin:0 0 5px;font-size:15px}
+    .value-item .desc{margin:0;color:var(--muted);font-size:11px;line-height:1.45}
+    .decision-chip{border-radius:999px;padding:6px 9px;font-size:10px;font-weight:700;white-space:nowrap}
+    .decision-chip.accelerate{background:#e3f7f2;color:#247765}
+    .decision-chip.maintain{background:#edf4ff;color:#275fae}
+    .decision-chip.review{background:#fdebf0;color:#a63d59}
+    .effort-line{display:grid;grid-template-columns:1fr auto 1fr auto;align-items:center;gap:10px;margin:16px 0 12px}
+    .effort-box{border:1px solid var(--line);border-radius:13px;padding:11px 12px;background:#f8faff}
+    .effort-box small{display:block;color:var(--muted);font-size:10px}
+    .effort-box strong{display:block;font-size:18px;margin-top:4px}
+    .effort-arrow{font-size:18px;color:var(--violet)}
+    .released{font-size:11px;color:#247765;font-weight:700;background:#e3f7f2;border-radius:999px;padding:6px 8px}
+    .value-progress{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-top:10px}
+    .value-progress span{font-size:10px;color:var(--muted)}
+    .action-links{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px}
+    .action-links small{color:var(--muted);font-size:10px}
+    .link-kanban{border:1px solid #b9cff2;background:#edf4ff;color:#275fae;border-radius:10px;padding:7px 10px;font-size:10px;font-weight:700}
+    .value-side{position:sticky;top:100px}
+    .matrix{position:relative;height:330px;border:1px solid var(--line);border-radius:18px;background:
+      linear-gradient(to right,transparent 49.7%,#dbe3ee 49.7%,#dbe3ee 50.3%,transparent 50.3%),
+      linear-gradient(to bottom,transparent 49.7%,#dbe3ee 49.7%,#dbe3ee 50.3%,transparent 50.3%),
+      #fbfcff;overflow:hidden}
+    .matrix-label{position:absolute;font-size:10px;color:var(--muted)}
+    .matrix-label.top{top:8px;left:50%;transform:translateX(-50%)}
+    .matrix-label.bottom{bottom:8px;left:50%;transform:translateX(-50%)}
+    .matrix-label.left{left:7px;top:50%;transform:translateY(-50%) rotate(-90deg)}
+    .matrix-label.right{right:5px;top:50%;transform:translateY(-50%) rotate(90deg)}
+    .matrix-dot{position:absolute;width:15px;height:15px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--violet));border:2px solid #fff;box-shadow:0 4px 10px rgba(12,38,62,.2)}
+    .matrix-dot:hover::after{content:attr(data-label);position:absolute;left:19px;top:-7px;background:#071b2d;color:#fff;padding:6px 8px;border-radius:8px;font-size:9px;white-space:nowrap;z-index:3}
+    .decision-panel{margin-top:14px;border:1px solid var(--line);border-radius:17px;padding:15px;background:#fff}
+    .decision-panel h4{margin:0 0 10px}
+    .decision-row{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #edf1f6;font-size:11px}
+    .decision-row:last-child{border-bottom:0}
+    .decision-row b{max-width:65%}
+
+
+    .priority-legend{
+      display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 14px;
+      padding:10px 12px;border:1px solid var(--line);border-radius:13px;background:#fbfcff
+    }
+    .priority-legend strong{font-size:11px;margin-right:3px}
+    .legend-item{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted)}
+    .legend-pill{font-size:9px;font-weight:700;text-transform:uppercase;padding:4px 7px;border-radius:999px}
+    .legend-pill.high{background:#fdebf0;color:#a63d59}
+    .legend-pill.medium{background:#eeeafd;color:#5e48bb}
+    .legend-pill.low{background:#e3f7f2;color:#247765}
+    .legend-note{margin-left:auto;font-size:10px;color:#536980}
+    .team-note{
+      border:1px solid #d3e3fb;background:#edf4ff;color:#365b84;border-radius:14px;
+      padding:11px 13px;margin-bottom:16px;font-size:11px;line-height:1.45
+    }
+    .stage-bar{display:flex;height:9px;border-radius:999px;overflow:hidden;background:#edf1f6;margin:10px 0 7px}
+    .stage-bar i{display:block;height:100%}
+    .stage-backlog{background:#96a5b7}
+    .stage-prioritized{background:#7657e6}
+    .stage-doing{background:#2f7df6}
+    .stage-validation{background:#22a6a1}
+    .stage-mini{display:grid;grid-template-columns:repeat(2,1fr);gap:5px 9px;margin-top:9px}
+    .stage-mini span{font-size:9px;color:var(--muted);display:flex;justify-content:space-between}
+    .person-alerts{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+    .mini-status{font-size:9px;border-radius:999px;padding:5px 7px;background:#f1f4f8;color:#52677d}
+    .mini-status.late{background:#fdebf0;color:#a63d59}
+    .person-analyze{width:100%;margin-top:12px;border:1px solid #b9cff2;background:#edf4ff;color:#275fae;border-radius:10px;padding:8px;font-size:10px;font-weight:700}
+    .wide-modal{max-width:830px}
+    .workload-summary{grid-template-columns:repeat(4,1fr);margin:15px 0}
+    .workload-kpi{border:1px solid var(--line);border-radius:14px;padding:12px;background:#f8faff}
+    .workload-kpi small{display:block;color:var(--muted);font-size:10px}
+    .workload-kpi strong{display:block;margin-top:5px;font-size:19px}
+    .workload-grid{grid-template-columns:1fr 1fr;margin-top:14px}
+    .stage-detail{border:1px solid var(--line);border-radius:15px;padding:14px;background:#fff}
+    .stage-detail h4{margin:0 0 10px;font-size:13px}
+    .stage-line{display:grid;grid-template-columns:110px 1fr 48px;gap:8px;align-items:center;margin:9px 0;font-size:10px}
+    .manager-reading{border:1px solid #cfe0f8;border-radius:15px;padding:14px;background:#edf4ff}
+    .manager-reading h4{margin:0 0 8px;font-size:13px}
+    .manager-reading p{font-size:11px;line-height:1.55;margin:0 0 8px;color:#365b84}
+    .manager-reading b{color:#173e70}
+    .critical-commitment{
+      border:1px solid #edb7c4;background:linear-gradient(90deg,#fff7f9,#fff);
+      border-radius:16px;padding:15px;margin:12px 0 17px
+    }
+    .critical-label{font-size:9px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;color:#a63d59}
+    .critical-commitment h4{font-size:14px;margin:6px 0}
+    .critical-meta{display:flex;flex-wrap:wrap;gap:7px;font-size:10px;color:var(--muted)}
+    .method-card{border:1px solid var(--line);border-radius:16px;padding:16px;background:#f8faff}
+    .method-card h4{margin:0 0 7px}
+    .method-badge{display:inline-flex;border-radius:999px;padding:6px 9px;background:#eeeafd;color:#5e48bb;font-size:10px;font-weight:700;margin-bottom:10px}
+    .commitment-list{display:grid;gap:10px}
+    .commitment{
+      display:grid;grid-template-columns:1fr auto;gap:12px;border:1px solid var(--line);
+      border-radius:15px;padding:13px;background:#fff
+    }
+    .commitment h4{margin:0 0 6px;font-size:12px}
+    .commitment-meta{display:flex;flex-wrap:wrap;gap:7px;font-size:9px;color:var(--muted)}
+    .commitment-side{text-align:right;min-width:105px}
+    .commitment-status{font-size:9px;font-weight:700;border-radius:999px;padding:5px 7px;display:inline-flex}
+    .commitment-status.late{background:#fdebf0;color:#a63d59}
+    .commitment-status.progress{background:#edf4ff;color:#275fae}
+    .commitment-status.done{background:#e3f7f2;color:#247765}
+    .commitment button{margin-top:8px;border:1px solid #b9cff2;background:#edf4ff;color:#275fae;border-radius:8px;padding:6px 8px;font-size:9px;font-weight:700}
+    .evidence-grid{grid-template-columns:repeat(2,1fr)}
+
+
+    .critical-side{border-color:rgba(201,87,115,.28);background:linear-gradient(180deg,rgba(201,87,115,.12),rgba(255,255,255,.05))}
+    .critical-side button{background:linear-gradient(90deg,#c95773,#7657e6)}
+    .ritual-list{padding:14px}
+    .ritual-btn{
+      width:100%;border:1px solid transparent;background:transparent;text-align:left;
+      padding:13px;border-radius:13px;margin-bottom:6px;transition:.18s
+    }
+    .ritual-btn:hover{background:#f3f6fa}
+    .ritual-btn.active{background:#edf4ff;border-color:#c9daf4;color:#173e70}
+    .ritual-btn b{display:block;font-size:12px;margin-bottom:4px}
+    .ritual-btn span{font-size:10px;color:var(--muted)}
+    .ritual-detail{padding:20px}
+    .ritual-title{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:15px}
+    .ritual-title h3{margin:0 0 5px}
+    .ritual-title p{margin:0;color:var(--muted);font-size:11px}
+    .ritual-status{border-radius:999px;padding:6px 9px;background:#e3f7f2;color:#247765;font-size:9px;font-weight:700}
+    .ritual-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;margin-bottom:14px}
+    .ritual-card{border:1px solid var(--line);border-radius:14px;padding:13px;background:#fbfcff}
+    .ritual-card small{display:block;color:var(--muted);font-size:9px;margin-bottom:5px}
+    .ritual-card strong{font-size:12px;line-height:1.35}
+    .ritual-objective{border:1px solid #d3e3fb;background:#edf4ff;border-radius:15px;padding:14px;margin-bottom:14px}
+    .ritual-objective small{display:block;color:#536980;font-size:9px;margin-bottom:5px}
+    .ritual-objective strong{font-size:13px;color:#173e70}
+    .ritual-section{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+    .ritual-section h4{margin:0 0 10px;font-size:12px}
+    .prep-list,.linked-list{display:grid;gap:8px}
+    .prep-item,.linked-item{
+      display:flex;justify-content:space-between;align-items:center;gap:10px;
+      border:1px solid var(--line);border-radius:12px;padding:10px 11px;background:#fff;font-size:10px
+    }
+    .prep-item span,.linked-item span{color:var(--muted)}
+    .linked-item button{border:1px solid #b9cff2;background:#edf4ff;color:#275fae;border-radius:8px;padding:6px 8px;font-size:9px;font-weight:700}
+    .ritual-footer{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:14px}
+    .ritual-footer .ritual-card{background:#f8faff}
+
+
+    .page-scope{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:6px 9px;border-radius:999px;background:#f0edff;color:#5e48bb;font-size:10px;font-weight:700}
+
+
+    .about-hero{
+      background:linear-gradient(135deg,#071b2d 0%,#0c2d4b 58%,#243a74 100%);
+      color:#fff;border-radius:26px;padding:30px;position:relative;overflow:hidden;
+      box-shadow:0 22px 55px rgba(7,27,45,.20);margin-bottom:18px
+    }
+    .about-hero::after{
+      content:"";position:absolute;width:270px;height:270px;border:2px solid rgba(122,174,255,.22);
+      border-radius:42% 58% 54% 46%;right:-80px;top:-105px;transform:rotate(20deg)
+    }
+    .about-hero .eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:1.1px;color:#a9c8f5;font-weight:700}
+    .about-hero h2{font-size:32px;margin:9px 0 9px;max-width:740px;letter-spacing:-.6px}
+    .about-hero p{margin:0;max-width:800px;color:#c5d5e7;font-size:14px;line-height:1.55}
+    .about-flow{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:22px}
+    .about-flow span{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);padding:8px 11px;border-radius:999px;font-size:10px;font-weight:700}
+    .about-flow b{color:#83aff2}
+    .about-grid{grid-template-columns:1fr 1fr;margin-bottom:18px}
+    .about-block{padding:20px}
+    .about-block h3{margin:0 0 8px;font-size:17px}
+    .about-block p{margin:0;color:var(--muted);font-size:12px;line-height:1.55}
+    .decision-questions{display:grid;gap:10px;margin-top:15px}
+    .decision-question{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fbfcff}
+    .decision-question small{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+    .decision-question strong{font-size:12px}
+    .map-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+    .map-card{border:1px solid var(--line);border-radius:16px;background:#fff;padding:14px;min-height:132px}
+    .map-card .num{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;background:#edf4ff;color:#275fae;font-size:10px;font-weight:700;margin-bottom:10px}
+    .map-card h4{margin:0 0 6px;font-size:12px}
+    .map-card p{margin:0;color:var(--muted);font-size:10px;line-height:1.45}
+    .about-note{margin-top:15px;border:1px solid #d3e3fb;background:#edf4ff;border-radius:14px;padding:12px 14px;color:#365b84;font-size:11px;line-height:1.5}
+    @media(max-width:1050px){.map-grid{grid-template-columns:repeat(2,1fr)}}
+
+
+    .meeting-flow{
+      display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 15px;
+      padding:11px 13px;border:1px solid #d3e3fb;background:#edf4ff;border-radius:14px
+    }
+    .meeting-flow span{
+      display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #dbe3ee;
+      padding:7px 9px;border-radius:999px;font-size:10px;font-weight:700;color:#365b84
+    }
+    .meeting-flow b{color:#7657e6}
+    .meeting-kpis{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:15px}
+    .meeting-kpi{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}
+    .meeting-kpi small{display:block;color:var(--muted);font-size:9px}
+    .meeting-kpi strong{display:block;margin-top:5px;font-size:20px}
+    .meeting-result{
+      display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px
+    }
+    .meeting-result span{
+      font-size:9px;font-weight:700;border-radius:999px;padding:6px 8px;
+      background:#f1f4f8;color:#52677d
+    }
+    .meeting-result .late{background:#fdebf0;color:#a63d59}
+    .meeting-result .done{background:#e3f7f2;color:#247765}
+    @media(max-width:760px){.meeting-kpis{grid-template-columns:1fr 1fr}}
+
+    .mobile-menu{display:none}
+    @media(max-width:1050px){
+      .kpis{grid-template-columns:repeat(2,1fr)}
+      .two,.agenda-layout,.insights-layout,.value-layout{grid-template-columns:1fr}
+      .team-grid{grid-template-columns:repeat(2,1fr)}
+      .action-kpis,.value-summary,.workload-summary{grid-template-columns:repeat(2,1fr)}
+    }
+    @media(max-width:760px){
+      .app{grid-template-columns:1fr}.sidebar{position:fixed;left:-280px;transition:.25s;width:260px}.sidebar.open{left:0}.mobile-menu{display:inline-flex}
+      .topbar{padding:0 14px}.content{padding:20px 14px 40px}.kpis,.team-grid,.bets,.decision-grid,.action-kpis,.value-summary,.workload-summary,.workload-grid,.evidence-grid,.ritual-grid,.ritual-footer,.about-grid,.map-grid{grid-template-columns:1fr}
+      .page-head{align-items:flex-start;flex-direction:column}.top-actions .filter{display:none}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">DX</div>
+      <div><h1>Rotina DX</h1><p>Gestão de Rotina Inteligente</p></div>
+    </div>
+    <nav class="nav" id="nav">
+      <button class="active" data-page="about"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>Sobre o projeto</button>
+      <button data-page="overview"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Visão geral</button>
+      <button data-page="team"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-7 7-7s7 3 7 7"/><path d="M16 4c3 0 5 2 5 5s-2 5-5 5"/></svg>Equipe</button>
+      <button data-page="agenda"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Ritmos & Responsáveis</button>
+      <button data-page="insights"><svg viewBox="0 0 24 24"><path d="M12 3l1.3 4.2L17.5 8.5l-4.2 1.3L12 14l-1.3-4.2L6.5 8.5l4.2-1.3L12 3z"/><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8L18 15z"/></svg>Atas & Combinados</button>
+      <button data-page="governance"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Valor & Capacidade</button>
+    </nav>
+    
+    <div class="side-card critical-side">
+      <small>Combinado crítico</small>
+      <strong id="sideCriticalTitle">Atualizar painel executivo</strong>
+      <p id="sideCriticalMeta">Camila · prazo 29 jul · atrasada</p>
+      <button onclick="highlightAction(3)">Ver no Kanban</button>
+    </div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div style="display:flex;gap:12px;align-items:center">
+        <button class="ghost mobile-menu" id="mobileMenu">☰</button>
+        <div class="crumb"><strong id="topTitle">Sobre o projeto</strong></div>
+      </div>
+      <div class="top-actions">
+        <select class="filter" id="zoneFilter" title="Este filtro atualiza todas as páginas e indicadores">
+          <option value="all">Todas as unidades</option>
+          <option value="ZN">Unidade Norte</option>
+          <option value="ZS">Unidade Sul</option>
+          <option value="ZO">Unidade Oeste</option>
+          <option value="ZL">Unidade Leste</option>
+        </select>
+        <button class="ghost" id="presentationBtn">Tela cheia</button>
+        <button class="primary" onclick="openModal()">Simular iniciativa</button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <section class="page active" id="about">
+        <div class="about-hero">
+          <span class="eyebrow">Projeto Técnico · Inovação e Agilidade</span>
+          <h2>Gestão de Rotina Inteligente</h2>
+          <p>Plataforma digital integrada para transformar informações dispersas em decisões rastreáveis, compromissos claros e melhoria contínua da capacidade da equipe.</p>
+          <div class="about-flow">
+            <span>Entender o contexto</span><b>→</b>
+            <span>Priorizar</span><b>→</b>
+            <span>Executar</span><b>→</b>
+            <span>Medir esforço e valor</span><b>→</b>
+            <span>Aprender e ajustar</span>
+          </div>
+        </div>
+
+        <div class="grid about-grid">
+          <div class="card about-block">
+            <h3>Problema que a plataforma resolve</h3>
+            <p>Capacidade, iniciativas, reuniões, decisões e ações costumam permanecer distribuídas em diferentes controles. Isso reduz a visão sobre sobrecarga, prioridades, responsáveis, prazos e valor gerado.</p>
+            <div class="decision-questions">
+              <div class="decision-question"><small>Pergunta 1</small><strong>Onde a equipe está investindo esforço?</strong></div>
+              <div class="decision-question"><small>Pergunta 2</small><strong>Quais compromissos estão em risco?</strong></div>
+              <div class="decision-question"><small>Pergunta 3</small><strong>O que deve ser acelerado, mantido ou revisado?</strong></div>
+            </div>
+          </div>
+
+          <div class="card about-block">
+            <h3>Propósito gerencial</h3>
+            <p>O aplicativo não busca apenas organizar informações. Ele conecta evidências, decisões, responsáveis e resultados para apoiar a gestão da rotina.</p>
+            <div class="decision-questions">
+              <div class="decision-question"><small>Gestão à vista</small><strong>Capacidade e fluxo de ações em um único recorte.</strong></div>
+              <div class="decision-question"><small>Governança</small><strong>Cada decisão gera um compromisso com dono e prazo.</strong></div>
+              <div class="decision-question"><small>Melhoria contínua</small><strong>Esforço atual é comparado ao esforço-alvo e ao valor esperado.</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card panel">
+          <h3>Como navegar pela tomada de decisão</h3>
+          <div class="sub">Cada aba responde a uma pergunta gerencial específica</div>
+          <div class="grid map-grid">
+            <article class="map-card"><span class="num">01</span><h4>Visão geral</h4><p>Qual é a situação atual da capacidade, das frentes e das ações?</p></article>
+            <article class="map-card"><span class="num">02</span><h4>Equipe</h4><p>Quem está sobrecarregado e em qual etapa o esforço está concentrado?</p></article>
+            <article class="map-card"><span class="num">03</span><h4>Ritmos & Responsáveis</h4><p>Quais rituais exigem preparação, decisão e acompanhamento?</p></article>
+            <article class="map-card"><span class="num">04</span><h4>Decisões & Combinados</h4><p>O que foi decidido, por quê, por quem e até quando?</p></article>
+            <article class="map-card"><span class="num">05</span><h4>Valor & Capacidade</h4><p>Quanto esforço pode ser liberado e qual iniciativa entrega mais valor?</p></article>
+          </div>
+          <div class="about-note"><b>Protótipo acadêmico:</b> todos os nomes, projetos, indicadores, reuniões e dados apresentados são fictícios. As métricas demonstram a lógica proposta e não representam resultados reais.</div>
+        </div>
+      </section>
+
+      <section class="page" id="overview">
+        <div class="page-head">
+          <div><span class="badge">● Gestão integrada</span><h2>Visão geral</h2><p>Capacidade, ações e prioridades em uma única visão.</p></div>
+        </div>
+        <div class="grid kpis" id="overviewKpis"></div>
+        <div class="grid two">
+          <div class="card panel">
+            <h3>Capacidade da equipe</h3><div class="sub">Horas semanais alocadas por profissional</div>
+            <div id="capacityRows"></div>
+          </div>
+          <div class="card panel">
+            <h3>Cobertura das frentes</h3><div class="sub">Principais iniciativas e status</div>
+            <div class="initiative-list" id="initiativeList"></div>
+          </div>
+        </div>
+
+        <div class="card flow-panel">
+          <div class="flow-head">
+            <div>
+              <h3>Fluxo das ações</h3>
+              <p>Gestão à vista do andamento das decisões, entregas e melhorias priorizadas.</p>
+            </div>
+            <span class="flow-tip">Arraste os cards para simular o fluxo</span>
+          </div>
+          <div class="action-kpis" id="actionKpis"></div>
+          <div class="priority-legend">
+            <strong>Legenda de prioridade:</strong>
+            <span class="legend-item"><span class="legend-pill high">Alta</span> impacto ou prazo crítico</span>
+            <span class="legend-item"><span class="legend-pill medium">Média</span> importante no ciclo atual</span>
+            <span class="legend-item"><span class="legend-pill low">Baixa</span> melhoria sem risco imediato</span>
+            <span class="legend-note">Prioridade ≠ complexidade</span>
+          </div>
+          <div class="kanban-wrap">
+            <div class="kanban" id="kanbanBoard"></div>
+          </div>
+        </div>
+
+      </section>
+
+      <section class="page" id="team">
+        <div class="page-head">
+          <div><span class="badge">● Gestão à vista</span><h2>Equipe</h2><p>Esforço por etapa, permanência no fluxo e risco de atraso.</p></div>
+          <button class="ghost" onclick="sortTeam()">Ordenar por carga</button>
+        </div>
+        <div class="team-note"><b>Como ler:</b> “5h em Backlog” significa <b>5 horas de esforço planejado</b> em itens que ainda não começaram. O tempo já parado na etapa aparece separadamente em <b>dias de permanência</b>.</div>
+        <div class="grid team-grid" id="teamGrid"></div>
+      </section>
+
+      
+      <section class="page" id="agenda">
+        <div class="page-head">
+          <div>
+            <span class="badge">● Governança dos rituais</span>
+            <h2>Ritmos & Responsáveis</h2>
+            <p>Quem prepara, quem decide e quais combinados saem da reunião.</p>
+          </div>
+        </div>
+        <div class="grid agenda-layout">
+          <div class="card ritual-list" id="ritualList"></div>
+          <div class="card ritual-detail" id="ritualDetail"></div>
+        </div>
+      </section>
+
+      <section class="page" id="insights">
+        <div class="page-head"><div><span class="badge">● Da reunião para a execução</span><h2>Atas & Combinados</h2><p>Decisão, responsável, prazo e andamento — tudo conectado ao Kanban.</p></div></div>
+        <div class="meeting-flow">
+          <span>Ata</span><b>→</b>
+          <span>Decisão</span><b>→</b>
+          <span>Combinado</span><b>→</b>
+          <span>Responsável e prazo</span><b>→</b>
+          <span>Kanban</span>
+        </div>
+        <div class="grid meeting-kpis" id="meetingKpis"></div>
+        <div class="grid insights-layout">
+          <div class="card meeting-menu" id="insightMenu"></div>
+          <div class="card panel">
+            <div id="insightHeader"></div>
+            <div class="tabs">
+              <button class="tab active" data-tab="summary">Decisão</button>
+              <button class="tab" data-tab="actions">Combinados</button>
+              <button class="tab" data-tab="themes">Método aplicado</button>
+              <button class="tab" data-tab="participation">Evidências</button>
+            </div>
+            <div class="tab-content active" id="summary"></div>
+            <div class="tab-content" id="actions"></div>
+            <div class="tab-content" id="themes"></div>
+            <div class="tab-content" id="participation"></div>
+          </div>
+        </div>
+      </section>
+
+      
+      <section class="page" id="governance">
+        <div class="page-head">
+          <div>
+            <span class="badge">● Esforço conectado ao valor</span>
+            <h2>Valor & Capacidade</h2>
+            <p>Esforço atual, esforço-alvo e valor esperado.</p>
+          </div>
+        </div>
+
+        <div class="grid value-summary" id="valueSummary"></div>
+
+        <div class="grid value-layout">
+          <div>
+            <div class="card panel">
+              <h3>Portfólio de melhoria</h3>
+              <div class="sub">Esforço atual → esforço-alvo → capacidade potencialmente liberada</div>
+              <div class="value-list" id="valueList"></div>
+            </div>
+          </div>
+
+          <aside class="value-side">
+            <div class="card panel">
+              <h3>Matriz esforço × valor</h3>
+              <div class="sub">Apoio à priorização das iniciativas</div>
+              <div class="matrix" id="effortMatrix"></div>
+            </div>
+
+            <div class="decision-panel">
+              <h4>Decisões recomendadas</h4>
+              <div id="decisionRows"></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="modal-back" id="modal">
+  <div class="modal">
+    <h3>Simular nova iniciativa</h3>
+    <p style="color:var(--muted)">Demonstração do fluxo de cadastro e priorização.</p>
+    <label>Nome da iniciativa<br><input id="newName" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;margin:7px 0 14px"></label>
+    <label>Unidade<br><select id="newZone" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;margin-top:7px"><option>ZN</option><option>ZS</option><option>ZO</option><option>ZL</option></select></label>
+    <div class="modal-actions"><button class="ghost" onclick="closeModal()">Cancelar</button><button class="primary" onclick="addInitiative()">Adicionar</button></div>
+  </div>
+</div>
+
+<div class="modal-back" id="aboutModal">
+  <div class="modal">
+    <h3>Sobre o protótipo</h3>
+    <p style="color:var(--muted);line-height:1.5">
+      O Rotina DX é uma proposta acadêmica de plataforma integrada para tornar a gestão da rotina
+      mais visual, rastreável e orientada à melhoria contínua.
+    </p>
+    <div class="about-list">
+      <div class="about-item"><b>Problema</b><span>Informações dispersas entre planilhas, calendários, atas e diferentes ferramentas.</span></div>
+      <div class="about-item"><b>Objetivo</b><span>Conectar capacidade, iniciativas, reuniões, decisões, ações e governança em uma única visão.</span></div>
+      <div class="about-item"><b>Escopo</b><span>Gestão à vista, balanceamento de capacidade, fluxo Kanban, rituais e acompanhamento estratégico.</span></div>
+      <div class="about-item"><b>Privacidade</b><span>Todos os nomes, projetos, reuniões, indicadores e dados apresentados são fictícios.</span></div>
+    </div>
+    <div class="modal-actions"><button class="primary" onclick="closeAbout()">Entendi</button></div>
+  </div>
+</div>
+
+<div class="modal-back" id="personModal">
+  <div class="modal wide-modal">
+    <div id="personModalContent"></div>
+    <div class="modal-actions"><button class="primary" onclick="closePerson()">Fechar análise</button></div>
+  </div>
+</div>
+
+<script>
+
+
+const valuePortfolio=[
+ {id:"capacity",name:"Capacidade 360",description:"Balanceamento da carga e redistribuição das iniciativas.",current:34,target:22,value:92,effort:70,decision:"Acelerar",actions:[1,5,9],allocations:{ZN:{current:0,target:0},ZS:{current:10,target:7},ZO:{current:16,target:10},ZL:{current:8,target:5}}},
+ {id:"flow",name:"Fluxo Ágil",description:"Redução de esperas, validações duplicadas e tempo de ciclo.",current:28,target:17,value:88,effort:78,decision:"Acelerar",actions:[2,8],allocations:{ZN:{current:20,target:12},ZS:{current:0,target:0},ZO:{current:0,target:0},ZL:{current:8,target:5}}},
+ {id:"routine",name:"Painel de Rotina",description:"Consolidação de indicadores e redução de controles paralelos.",current:18,target:11,value:76,effort:45,decision:"Manter",actions:[3],allocations:{ZN:{current:0,target:0},ZS:{current:0,target:0},ZO:{current:8,target:5},ZL:{current:10,target:6}}},
+ {id:"journey",name:"Jornada Clara",description:"Padronização do piloto e redução de dúvidas durante a implantação.",current:16,target:10,value:70,effort:52,decision:"Manter",actions:[4,10],allocations:{ZN:{current:0,target:0},ZS:{current:9,target:5},ZO:{current:0,target:0},ZL:{current:7,target:5}}},
+ {id:"knowledge",name:"Operação Conectada",description:"Centralização de orientações e aprendizados do processo.",current:12,target:9,value:58,effort:35,decision:"Revisar",actions:[6],allocations:{ZN:{current:0,target:0},ZS:{current:0,target:0},ZO:{current:0,target:0},ZL:{current:12,target:9}}},
+ {id:"rhythms",name:"Ritmos de gestão",description:"Reuniões mais objetivas, com decisões e ações rastreáveis.",current:10,target:7,value:66,effort:25,decision:"Manter",actions:[7],allocations:{ZN:{current:0,target:0},ZS:{current:0,target:0},ZO:{current:6,target:4},ZL:{current:4,target:3}}}
+];
+
+const actionStages=[
+ {key:"backlog",label:"Backlog"},
+ {key:"prioritized",label:"Priorizada"},
+ {key:"doing",label:"Em andamento"},
+ {key:"validation",label:"Em validação"},
+ {key:"done",label:"Concluída"}
+];
+let actionFlow=[
+ {id:1,title:"Consolidar matriz de capacidade",front:"Capacidade 360",owner:"Lucas Ferreira",zone:"ZO",due:"31 jul",priority:"Alta",status:"doing",late:false},
+ {id:2,title:"Validar critérios do novo fluxo",front:"Fluxo Ágil",owner:"Bianca Alves",zone:"ZN",due:"30 jul",priority:"Alta",status:"validation",late:false},
+ {id:3,title:"Atualizar painel executivo",front:"Painel de Rotina",owner:"Camila Rocha",zone:"ZL",due:"29 jul",priority:"Média",status:"prioritized",late:true},
+ {id:4,title:"Preparar piloto de integração",front:"Jornada Clara",owner:"Rafael Martins",zone:"ZS",due:"02 ago",priority:"Média",status:"doing",late:false},
+ {id:5,title:"Revisar responsáveis das ações",front:"Governança",owner:"Camila Rocha",zone:"ZL",due:"28 jul",priority:"Alta",status:"backlog",late:true},
+ {id:6,title:"Organizar base de conhecimento",front:"Operação Conectada",owner:"Sofia Mendes",zone:"ZL",due:"05 ago",priority:"Baixa",status:"prioritized",late:false},
+ {id:7,title:"Padronizar roteiro da reunião semanal",front:"Ritmos de gestão",owner:"Lucas Ferreira",zone:"ZO",due:"25 jul",priority:"Média",status:"done",late:false},
+ {id:8,title:"Definir indicador de tempo de ciclo",front:"Melhoria contínua",owner:"Bianca Alves",zone:"ZN",due:"04 ago",priority:"Média",status:"backlog",late:false},
+ {id:9,title:"Validar distribuição das iniciativas",front:"Capacidade 360",owner:"Rafael Martins",zone:"ZS",due:"27 jul",priority:"Alta",status:"done",late:false},
+ {id:10,title:"Registrar aprendizados do piloto",front:"Jornada Clara",owner:"Sofia Mendes",zone:"ZL",due:"06 ago",priority:"Baixa",status:"validation",late:false}
+];
+
+const team=[
+ {name:"Camila Rocha",role:"Analista Sênior",zone:"ZL",load:41,hours:16.5,initiatives:7,tags:["Operação Conectada","Entrada Inteligente"],stages:{backlog:5,prioritized:3,doing:6.5,validation:2},completed:3,overdue:2,aging:11},
+ {name:"Rafael Martins",role:"Analista Sênior",zone:"ZS",load:39,hours:15.5,initiatives:7,tags:["Jornada Clara","Integração de Talentos"],stages:{backlog:2.5,prioritized:3,doing:7,validation:3},completed:2,overdue:0,aging:5},
+ {name:"Bianca Alves",role:"Analista Sênior",zone:"ZN",load:46,hours:18.5,initiatives:7,tags:["Fluxo Ágil","Controle de Fluxo"],stages:{backlog:4,prioritized:2,doing:9.5,validation:3},completed:4,overdue:1,aging:7},
+ {name:"Lucas Ferreira",role:"Analista Sênior",zone:"ZO",load:46,hours:18.5,initiatives:7,tags:["Capacidade 360","Painel de Rotina"],stages:{backlog:1.5,prioritized:2,doing:10,validation:5},completed:5,overdue:0,aging:3},
+ {name:"Sofia Mendes",role:"Aprendiz",zone:"ZL",load:19,hours:7.5,initiatives:5,tags:["Jovem Aprendiz"],stages:{backlog:2,prioritized:1.5,doing:3,validation:1},completed:2,overdue:0,aging:4},
+ {name:"Vaga Aberta",role:"Analista Sênior",zone:"ZS",load:0,hours:0,initiatives:0,tags:["Capacidade disponível"],stages:{backlog:0,prioritized:0,doing:0,validation:0},completed:0,overdue:0,aging:0}
+];
+let initiatives=[
+ {name:"Fluxo Ágil",hours:"17h / sem",people:"2 pessoas",status:"Em atenção",zone:"ZN"},
+ {name:"Operação Conectada",hours:"15h / sem",people:"2 pessoas",status:"Estável",zone:"ZL"},
+ {name:"Painel de Rotina",hours:"8h / sem",people:"1 pessoa",status:"Estável",zone:"ZO"},
+ {name:"Jornada Clara",hours:"4h / sem",people:"1 pessoa",status:"Nova",zone:"ZS"}
+];
+
+const rituals=[
+ {
+  id:"portfolio",zones:["ZN","ZS","ZO","ZL"],scope:"Corporativo",
+  title:"Reunião Semanal de Portfólio",cadence:"Semanal · segunda-feira · 14:00",duration:"60 min",
+  facilitator:"Camila Rocha",decisionMaker:"Líder da área",
+  participants:"Owners das frentes e analistas responsáveis",
+  objective:"Priorizar capacidade entre as iniciativas e decidir o que acelerar, manter ou revisar.",
+  expectedDecision:"Direcionamento do portfólio e redistribuição da capacidade.",
+  preparation:[
+    {label:"Matriz esforço × valor atualizada",owner:"Camila Rocha",zone:"ZL",status:"Concluída"},
+    {label:"Aging das ações e atrasos",owner:"Lucas Ferreira",zone:"ZO",status:"Pendente"},
+    {label:"Capacidade semanal por pessoa",owner:"Rafael Martins",zone:"ZS",status:"Concluída"},
+    {label:"Tempos de ciclo e gargalos",owner:"Bianca Alves",zone:"ZN",status:"Concluída"}
+  ],
+  actionIds:[1,2,3,4],checkpoint:"Próxima segunda-feira · 14:00",
+  evidence:"Matriz de capacidade, esforço por frente, aging e ações críticas."
+ },
+ {
+  id:"executive",zones:["ZN","ZL","ZO"],scope:"Corporativo",
+  title:"Fórum Executivo de Projetos",cadence:"Quinzenal · terça-feira · 10:00",duration:"45 min",
+  facilitator:"Bianca Alves",decisionMaker:"Diretoria da área",
+  participants:"Liderança, responsáveis pelas frentes e parceiro de dados",
+  objective:"Tomar decisões sobre riscos, prioridades concorrentes e impedimentos que exigem escalonamento.",
+  expectedDecision:"Aprovação, redirecionamento ou interrupção de iniciativas.",
+  preparation:[
+    {label:"Matriz de riscos atualizada",owner:"Camila Rocha",zone:"ZL",status:"Atrasada"},
+    {label:"Cenários e impactos esperados",owner:"Bianca Alves",zone:"ZN",status:"Concluída"},
+    {label:"Pendências que exigem decisão",owner:"Lucas Ferreira",zone:"ZO",status:"Concluída"}
+  ],
+  actionIds:[3,5,8],checkpoint:"Próxima quinzena · terça-feira · 10:00",
+  evidence:"Riscos, custo de atraso, capacidade e impacto estratégico."
+ },
+ {
+  id:"flow",zones:["ZN"],scope:"Unidade Norte",
+  title:"Visita de Processo · Unidade Norte",cadence:"Mensal · quarta-feira · 09:00",duration:"90 min",
+  facilitator:"Bianca Alves",decisionMaker:"Responsável do processo",
+  participants:"Equipe operacional, processos e owner da frente",
+  objective:"Observar o fluxo real, identificar desperdícios e validar oportunidades de simplificação.",
+  expectedDecision:"Seleção de melhorias para teste no próximo ciclo.",
+  preparation:[
+    {label:"VSM atual e tempos de espera",owner:"Bianca Alves",zone:"ZN",status:"Concluída"},
+    {label:"Lista de exceções recorrentes",owner:"Bianca Alves",zone:"ZN",status:"Concluída"},
+    {label:"Critérios do piloto",owner:"Bianca Alves",zone:"ZN",status:"Pendente"}
+  ],
+  actionIds:[2,8],checkpoint:"03 de agosto · revisão do piloto",
+  evidence:"Observação do processo, handoffs, esperas e registros de retrabalho."
+ },
+ {
+  id:"oneone-zl",zones:["ZL"],scope:"Unidade Leste",
+  title:"1:1 de Carga e Prioridades · Unidade Leste",cadence:"Quinzenal · agenda individual",duration:"30 min",
+  facilitator:"Camila Rocha",decisionMaker:"Liderança e profissional",
+  participants:"Líder e profissionais da Unidade Leste",
+  objective:"Revisar carga, atrasos, prioridades concorrentes e impedimentos individuais.",
+  expectedDecision:"Ajustes de capacidade, limite de WIP e renegociação de prazos.",
+  preparation:[
+    {label:"Distribuição do esforço por etapa",owner:"Camila Rocha",zone:"ZL",status:"Concluída"},
+    {label:"Ações atrasadas e dependências",owner:"Sofia Mendes",zone:"ZL",status:"Pendente"}
+  ],
+  actionIds:[3,5,6,10],checkpoint:"Próximo encontro individual",
+  evidence:"Carga, WIP, entregas concluídas e compromissos atrasados."
+ },
+ {
+  id:"oneone-zs",zones:["ZS"],scope:"Unidade Sul",
+  title:"1:1 de Carga e Prioridades · Unidade Sul",cadence:"Quinzenal · agenda individual",duration:"30 min",
+  facilitator:"Rafael Martins",decisionMaker:"Liderança e profissional",
+  participants:"Líder e profissionais da Unidade Sul",
+  objective:"Acompanhar o piloto, capacidade disponível e evolução das ações.",
+  expectedDecision:"Manter, acelerar ou reduzir o escopo do piloto.",
+  preparation:[
+    {label:"Status da Jornada Clara",owner:"Rafael Martins",zone:"ZS",status:"Concluída"},
+    {label:"Capacidade disponível e próximos testes",owner:"Rafael Martins",zone:"ZS",status:"Pendente"}
+  ],
+  actionIds:[4,9],checkpoint:"Próximo encontro individual",
+  evidence:"Progresso do piloto, carga, riscos e resultados preliminares."
+ },
+ {
+  id:"oneone-zo",zones:["ZO"],scope:"Unidade Oeste",
+  title:"1:1 de Carga e Prioridades · Unidade Oeste",cadence:"Quinzenal · agenda individual",duration:"30 min",
+  facilitator:"Lucas Ferreira",decisionMaker:"Liderança e profissional",
+  participants:"Líder e profissionais da Unidade Oeste",
+  objective:"Avaliar esforço em andamento e evitar excesso de itens em validação.",
+  expectedDecision:"Limite de WIP e priorização das entregas mais próximas de gerar valor.",
+  preparation:[
+    {label:"Matriz de capacidade consolidada",owner:"Lucas Ferreira",zone:"ZO",status:"Pendente"},
+    {label:"Itens em validação e dependências",owner:"Lucas Ferreira",zone:"ZO",status:"Concluída"}
+  ],
+  actionIds:[1,7],checkpoint:"Próximo encontro individual",
+  evidence:"Esforço em andamento, validações e capacidade potencialmente liberada."
+ }
+];
+let currentRitual=0;
+
+const meetingsByDate={
+ "Seg, 06 jul":[["Reunião Semanal de Portfólio","14:00 · 60 min","Revisão semanal de frentes e capacidade"],["1:1 Camila & Lucas","16:00 · 30 min","Carreira, prioridades e desenvolvimento"]],
+ "Ter, 07 jul":[["Fórum Executivo de Projetos","10:00 · 45 min","Status executivo e riscos das frentes"],["Visita de Processo · Unidade Norte","15:00 · 90 min","Visita de campo e observação do processo"]],
+ "Qua, 08 jul":[["Check-in de Governança","09:00 · 20 min","Ações críticas e impedimentos"],["Fórum Jornada Clara","14:30 · 45 min","Validação do piloto"]],
+ "Qui, 09 jul":[["Reunião Estratégica Mensal","11:00 · 60 min","Big Bets e decisões de priorização"]],
+ "Sex, 10 jul":[["Retro do time","15:30 · 50 min","Aprendizados e melhoria contínua"]]
+};
+const insightMeetings=[
+ {
+  title:"Reunião Semanal de Portfólio — Ciclo 26",date:"23 de jun · 14:00 · 6 participantes",
+  method:"Matriz esforço × valor",
+  methodReason:"Escolhida para comparar impacto esperado, capacidade consumida e urgência antes da priorização.",
+  decisionByZone:{
+   ZN:"Priorizar a validação dos critérios do Fluxo Ágil e medir o tempo de ciclo antes da expansão.",
+   ZS:"Manter a Jornada Clara em piloto controlado e evitar novas frentes até validar o resultado.",
+   ZO:"Acelerar a consolidação da matriz de capacidade e concluir a padronização do ritual semanal.",
+   ZL:"Reduzir o volume simultâneo de ações, concluir o painel executivo e tratar os compromissos atrasados."
+  },
+  rationaleByZone:{
+   ZN:"O recorte concentra duas ações técnicas e maior potencial de redução do tempo de espera.",
+   ZS:"O piloto ainda precisa de evidências antes de receber capacidade adicional.",
+   ZO:"Há capacidade concentrada em execução; concluir as entregas atuais libera valor mais rapidamente.",
+   ZL:"A unidade possui maior quantidade de ações abertas e dois compromissos atrasados."
+  },
+  evidence:"Matriz de capacidade, aging das ações, esforço semanal e riscos reportados pelas unidades.",
+  checkpoint:"30 de jun · Reunião Semanal de Portfólio",
+  commitments:[
+   {text:"Consolidar a visão de adoção por unidade",owner:"Lucas Ferreira",zone:"ZO",due:"31 jul",status:"Em andamento",front:"Capacidade 360",actionId:1,priority:"Alta"},
+   {text:"Atualizar o plano de recuperação do Fluxo Ágil",owner:"Bianca Alves",zone:"ZN",due:"30 jul",status:"Em validação",front:"Fluxo Ágil",actionId:2,priority:"Alta"},
+   {text:"Preparar o piloto da Jornada Clara",owner:"Rafael Martins",zone:"ZS",due:"02 ago",status:"Em andamento",front:"Jornada Clara",actionId:4,priority:"Média"},
+   {text:"Atualizar o painel executivo",owner:"Camila Rocha",zone:"ZL",due:"29 jul",status:"Atrasada",front:"Painel de Rotina",actionId:3,priority:"Média"}
+  ]
+ },
+ {
+  title:"Fórum Executivo de Projetos — Ciclo 26",date:"24 de jun · 10:00 · 5 participantes",
+  method:"Cynefin",
+  methodReason:"Aplicado para diferenciar problemas claros, complicados e complexos antes de escolher a resposta gerencial.",
+  decisionByZone:{
+   ZN:"Tratar a inconsistência do fluxo como problema complicado, com análise técnica e teste controlado.",
+   ZL:"Escalonar os atrasos como problema claro de governança: responsáveis, prazos e limite de trabalho simultâneo.",
+   ZO:"Manter monitoramento do portfólio e evitar inclusão de nova demanda até concluir as entregas em andamento."
+  },
+  rationaleByZone:{
+   ZN:"O problema exige conhecimento especializado, evidências e validação antes da mudança definitiva.",
+   ZL:"As causas são conhecidas e exigem disciplina de execução, priorização e cobrança dos combinados.",
+   ZO:"O foco é preservar fluxo e capacidade, não iniciar uma nova intervenção."
+  },
+  evidence:"Histórico de retrabalho, divergências entre unidades, entrevistas rápidas e dados de utilização.",
+  checkpoint:"01 de jul · Fórum Executivo de Projetos",
+  commitments:[
+   {text:"Atualizar a matriz de riscos e causas",owner:"Camila Rocha",zone:"ZL",due:"29 jul",status:"Atrasada",front:"Painel de Rotina",actionId:3,priority:"Média"},
+   {text:"Revisar responsáveis das ações vencidas",owner:"Camila Rocha",zone:"ZL",due:"28 jul",status:"Atrasada",front:"Governança",actionId:5,priority:"Alta"},
+   {text:"Definir indicador de tempo de ciclo",owner:"Bianca Alves",zone:"ZN",due:"04 ago",status:"Backlog",front:"Melhoria contínua",actionId:8,priority:"Média"},
+   {text:"Concluir roteiro do ritual semanal",owner:"Lucas Ferreira",zone:"ZO",due:"25 jul",status:"Concluída",front:"Ritmos de gestão",actionId:7,priority:"Média"}
+  ]
+ },
+ {
+  title:"Visita de Processo · Unidade Norte",date:"25 de jun · 09:00 · 5 participantes",
+  method:"VSM — Mapeamento do Fluxo de Valor",
+  methodReason:"Usado para visualizar espera, retrabalho, transferências e etapas que não agregam valor ao fluxo.",
+  decisionByZone:{ZN:"Eliminar uma validação duplicada e testar uma regra única de entrada no piloto."},
+  rationaleByZone:{ZN:"O mapa atual mostrou concentração do tempo em espera e validações, não na execução principal."},
+  evidence:"Observação do processo, tempos de espera, handoffs e registros de exceções.",
+  checkpoint:"03 de jul · Revisão do piloto",
+  commitments:[
+   {text:"Validar critérios do novo fluxo",owner:"Bianca Alves",zone:"ZN",due:"30 jul",status:"Em validação",front:"Fluxo Ágil",actionId:2,priority:"Alta"},
+   {text:"Definir indicador de tempo de ciclo",owner:"Bianca Alves",zone:"ZN",due:"04 ago",status:"Backlog",front:"Melhoria contínua",actionId:8,priority:"Média"}
+  ]
+ },
+ {
+  title:"1:1 de Carga e Prioridades · Unidade Leste",date:"26 de jun · 16:00 · 3 participantes",
+  method:"Limite de WIP + gestão à vista",
+  methodReason:"Aplicado para reduzir o volume simultâneo de ações e tornar os atrasos explicitamente gerenciáveis.",
+  decisionByZone:{ZL:"Congelar novas ações até concluir o painel executivo e redefinir os responsáveis dos itens vencidos."},
+  rationaleByZone:{ZL:"A unidade concentra quatro ações abertas, duas atrasadas e maior permanência média em backlog."},
+  evidence:"Esforço planejado por etapa, dias em backlog, ações concluídas e atrasos.",
+  checkpoint:"02 de ago · revisão de capacidade",
+  commitments:[
+   {text:"Atualizar painel executivo",owner:"Camila Rocha",zone:"ZL",due:"29 jul",status:"Atrasada",front:"Painel de Rotina",actionId:3,priority:"Média"},
+   {text:"Revisar responsáveis das ações",owner:"Camila Rocha",zone:"ZL",due:"28 jul",status:"Atrasada",front:"Governança",actionId:5,priority:"Alta"},
+   {text:"Organizar base de conhecimento",owner:"Sofia Mendes",zone:"ZL",due:"05 ago",status:"Priorizada",front:"Operação Conectada",actionId:6,priority:"Baixa"}
+  ]
+ },
+ {
+  title:"Revisão do Piloto · Unidade Sul",date:"27 de jun · 14:30 · 3 participantes",
+  method:"Ciclo PDCA",
+  methodReason:"Aplicado para verificar resultados do piloto, aprender e ajustar antes de ampliar o escopo.",
+  decisionByZone:{ZS:"Manter o piloto por mais um ciclo e validar a distribuição das iniciativas antes do rollout."},
+  rationaleByZone:{ZS:"Uma ação já foi concluída, mas a principal entrega ainda está em andamento."},
+  evidence:"Resultados do piloto, capacidade disponível, ação concluída e pendências.",
+  checkpoint:"05 de ago · gate de expansão",
+  commitments:[
+   {text:"Preparar piloto de integração",owner:"Rafael Martins",zone:"ZS",due:"02 ago",status:"Em andamento",front:"Jornada Clara",actionId:4,priority:"Média"},
+   {text:"Validar distribuição das iniciativas",owner:"Rafael Martins",zone:"ZS",due:"27 jul",status:"Concluída",front:"Capacidade 360",actionId:9,priority:"Alta"}
+  ]
+ }
+];
+const betsData=[
+ ["Novos Modelos Operacionais","Destravar capacidade na malha por meio de novos modelos operacionais."],
+ ["Velocidade e Escalabilidade","Acelerar escala e tempo de entrega das iniciativas."],
+ ["Experiência e Qualidade","Reduzir falhas e melhorar a experiência ponta a ponta."],
+ ["Eficiência Sustentável","Entregar eficiência com custo dentro do orçamento."]
+];
+const governance=[
+ {title:"Capacidade 360",meta:"Processos · 7h · 1 pessoa",desc:"Adoção, produtividade, qualidade e cumprimento dos prazos.",links:["Guia do Processo","Dashboard Executivo","Base de Conhecimento"]},
+ {title:"Painel de Rotina",meta:"Governança · 8h · 1 pessoa",desc:"Adoção, produtividade, qualidade e cumprimento dos prazos.",links:["Guia do Processo","Base de Conhecimento"]},
+ {title:"Fluxo Ágil",meta:"Processos & Eficiência · 17h · 2 pessoas",desc:"Tempo de ciclo, filas, utilização da capacidade e prazo de conclusão.",links:["Guia do Processo","Painel de Indicadores"]},
+ {title:"Jornada Clara",meta:"Inovação · 4h · 1 pessoa",desc:"Ciclos de trabalho, validações iniciais e aderência ao novo modelo.",links:["Metas da Frente","Plano do piloto"]}
+];
+
+
+
+function linkedActions(portfolio){ return filteredActionFlow().filter(a=>portfolio.actions.includes(a.id)); }
+function portfolioProgress(portfolio){
+ const linked=linkedActions(portfolio);
+ if(!linked.length) return 0;
+ const weights={backlog:0,prioritized:20,doing:55,validation:80,done:100};
+ return Math.round(linked.reduce((sum,a)=>sum+weights[a.status],0)/linked.length);
+}
+function decisionClass(decision){
+ return decision==="Acelerar"?"accelerate":decision==="Manter"?"maintain":"review";
+}
+function renderValueCapacity(){
+ const portfolio=scopedPortfolio();
+ const actions=filteredActionFlow();
+ const current=portfolio.reduce((s,p)=>s+p.scopedCurrent,0);
+ const target=portfolio.reduce((s,p)=>s+p.scopedTarget,0);
+ const released=current-target;
+ const completedActions=actions.filter(a=>a.status==="done").length;
+ const totalActions=actions.length;
+ const avgProgress=portfolio.length?Math.round(portfolio.reduce((s,p)=>s+portfolioProgress(p),0)/portfolio.length):0;
+
+ document.getElementById("valueSummary").innerHTML=`
+   <div class="card value-kpi"><small>Esforço atual do portfólio</small><strong>${current}h/sem</strong><span>${selectedZoneLabel()}</span></div>
+   <div class="card value-kpi"><small>Esforço-alvo</small><strong>${target}h/sem</strong><span>Estado futuro planejado</span></div>
+   <div class="card value-kpi"><small>Capacidade potencialmente liberada</small><strong style="color:var(--good)">${released}h/sem</strong><span>${current?Math.round(released/current*100):0}% de redução estimada</span></div>
+   <div class="card value-kpi"><small>Avanço das ações</small><strong>${avgProgress}%</strong><span>${completedActions} de ${totalActions} concluídas</span></div>
+ `;
+
+ if(!portfolio.length){
+   document.getElementById("valueList").innerHTML=`<div class="empty">Nenhuma iniciativa de valor vinculada a este recorte.</div>`;
+   document.getElementById("effortMatrix").innerHTML=`<div class="empty">Sem dados para a matriz.</div>`;
+   document.getElementById("decisionRows").innerHTML=`<div class="empty">Sem recomendações neste recorte.</div>`;
+   return;
+ }
+
+ document.getElementById("valueList").innerHTML=portfolio.map(p=>{
+   const progress=portfolioProgress(p);
+   const released=p.scopedCurrent-p.scopedTarget;
+   const linked=linkedActions(p);
+   const done=linked.filter(a=>a.status==="done").length;
+   return `<article class="value-item">
+     <div class="value-item-head">
+       <div><h4>${p.name}</h4><p class="desc">${p.description}</p></div>
+       <span class="decision-chip ${decisionClass(p.decision)}">${p.decision}</span>
+     </div>
+     <div class="effort-line">
+       <div class="effort-box"><small>Esforço atual</small><strong>${p.scopedCurrent}h</strong></div>
+       <span class="effort-arrow">→</span>
+       <div class="effort-box"><small>Esforço-alvo</small><strong>${p.scopedTarget}h</strong></div>
+       <span class="released">-${released}h/sem</span>
+     </div>
+     <div class="value-progress">
+       <div class="bar"><i style="width:${progress}%"></i></div>
+       <b style="font-size:11px">${progress}%</b>
+     </div>
+     <div class="action-links">
+       <small>${linked.length} ações vinculadas · ${done} concluídas</small>
+       <button class="link-kanban" onclick="showPortfolioActions('${p.id}')">Ver no Kanban</button>
+     </div>
+   </article>`;
+ }).join("");
+
+ document.getElementById("effortMatrix").innerHTML=`
+   <span class="matrix-label top">Maior valor</span>
+   <span class="matrix-label bottom">Menor valor</span>
+   <span class="matrix-label left">Menor esforço</span>
+   <span class="matrix-label right">Maior esforço</span>
+ `+portfolio.map(p=>{
+   const left=8+(p.effort*.82);
+   const top=88-(p.value*.8);
+   return `<button class="matrix-dot" data-label="${p.name}" title="${p.name}" style="left:${left}%;top:${top}%" onclick="focusPortfolio('${p.id}')"></button>`;
+ }).join("");
+
+ document.getElementById("decisionRows").innerHTML=[...portfolio]
+   .sort((a,b)=>b.value-a.value)
+   .slice(0,4)
+   .map(p=>`<div class="decision-row"><b>${p.name}</b><span class="decision-chip ${decisionClass(p.decision)}">${p.decision}</span></div>`)
+   .join("");
+}
+function showPortfolioActions(id){
+ const portfolio=valuePortfolio.find(p=>p.id===id);
+ if(!portfolio) return;
+ goTo("overview");
+ setTimeout(()=>{
+   document.querySelector(".flow-panel")?.scrollIntoView({behavior:"smooth",block:"start"});
+   document.querySelectorAll(".action-card").forEach(card=>card.style.outline="");
+   portfolio.actions.forEach(actionId=>{
+     const card=[...document.querySelectorAll(".action-card")].find(c=>c.getAttribute("ondragstart")?.includes(`,${actionId})`));
+     if(card) card.style.outline="2px solid var(--violet)";
+   });
+ },120);
+}
+function focusPortfolio(id){
+ const portfolio=valuePortfolio.find(p=>p.id===id);
+ const item=[...document.querySelectorAll(".value-item")].find(el=>el.querySelector("h4")?.textContent===portfolio?.name);
+ if(item){
+   item.scrollIntoView({behavior:"smooth",block:"center"});
+   item.animate([{transform:"scale(1)"},{transform:"scale(1.02)"},{transform:"scale(1)"}],{duration:650});
+ }
+}
+
+function priorityClass(priority){
+ return priority==="Alta"?"high":priority==="Média"?"medium":"low";
+}
+function renderKanban(){
+ const actions=filteredActionFlow();
+ const open=actions.filter(a=>a.status!=="done").length;
+ const late=actions.filter(a=>a.late && a.status!=="done").length;
+ const onTime=actions.length?Math.round(actions.filter(a=>!a.late).length/actions.length*100):0;
+ const cycleByZone={all:"6,2",ZN:"7,1",ZS:"5,4",ZO:"4,8",ZL:"6,7"};
+ document.getElementById("actionKpis").innerHTML=`
+   <div class="action-kpi"><small>Ações abertas</small><strong>${open}</strong></div>
+   <div class="action-kpi"><small>Ações atrasadas</small><strong style="color:var(--rose)">${late}</strong></div>
+   <div class="action-kpi"><small>Ações no prazo</small><strong>${onTime}%</strong></div>
+   <div class="action-kpi"><small>Tempo médio de ciclo</small><strong>${cycleByZone[selectedZone()]} dias</strong></div>
+ `;
+ document.getElementById("kanbanBoard").innerHTML=actionStages.map(stage=>{
+   const cards=actions.filter(a=>a.status===stage.key);
+   return `<div class="kanban-col" ondragover="allowActionDrop(event)" ondragleave="leaveActionDrop(event)" ondrop="dropAction(event,'${stage.key}')">
+     <div class="kanban-col-head"><h4>${stage.label}</h4><span class="kanban-count">${cards.length}</span></div>
+     ${cards.map(a=>`<article class="action-card" draggable="true" ondragstart="dragAction(event,${a.id})">
+       <h5>${a.title}</h5>
+       <p>${a.front}</p>
+       <div class="action-meta">
+         <span class="action-owner"><span class="mini-avatar">${initials(a.owner)}</span>${a.owner.split(" ")[0]}</span>
+         <span class="priority ${priorityClass(a.priority)}">${a.priority}</span>
+       </div>
+       <div class="due"><span>Prazo: ${a.due}</span><span class="${a.late && a.status!=="done"?"late":""}">${a.late && a.status!=="done"?"Atrasada":"Atualizada"}</span></div>
+     </article>`).join("")}
+   </div>`;
+ }).join("");
+}
+function dragAction(event,id){
+ event.dataTransfer.setData("text/plain",String(id));
+ event.dataTransfer.effectAllowed="move";
+}
+function allowActionDrop(event){
+ event.preventDefault();
+ event.currentTarget.classList.add("drag-over");
+}
+function leaveActionDrop(event){
+ event.currentTarget.classList.remove("drag-over");
+}
+function dropAction(event,status){
+ event.preventDefault();
+ event.currentTarget.classList.remove("drag-over");
+ const id=Number(event.dataTransfer.getData("text/plain"));
+ const action=actionFlow.find(a=>a.id===id);
+ if(action){action.status=status;if(status==="done")action.late=false;renderAll();}
+}
+
+function initials(name){return name.split(" ").filter(Boolean).slice(0,2).map(x=>x[0]).join("")}
+
+function updateSideCritical(){
+ const critical=filteredActionFlow()
+   .filter(a=>a.status!=="done")
+   .sort((a,b)=>(Number(b.late)-Number(a.late)) || (a.priority==="Alta"?-1:1))[0];
+ const title=document.getElementById("sideCriticalTitle");
+ const meta=document.getElementById("sideCriticalMeta");
+ const btn=document.querySelector(".critical-side button");
+ if(!critical){
+   title.textContent="Nenhum combinado crítico";
+   meta.textContent=`${selectedZoneLabel()} · sem pendências críticas`;
+   if(btn){btn.textContent="Ver visão geral";btn.setAttribute("onclick","goTo('overview')");}
+   return;
+ }
+ title.textContent=critical.title;
+ meta.textContent=`${critical.owner.split(" ")[0]} · prazo ${critical.due} · ${critical.late?"atrasada":critical.status}`;
+ if(btn){btn.textContent="Ver no Kanban";btn.setAttribute("onclick",`highlightAction(${critical.id})`);}
+}
+
+function renderAll(){
+ updateGlobalScopeLabel();
+ renderOverviewKpis();
+ renderCapacity();
+ renderInitiatives();
+ renderTeam();
+ renderRituals();
+ renderInsights();
+ renderMeetingKpis();
+ renderKanban();
+ renderValueCapacity();
+ updateSideCritical();
+}
+
+const zoneNames={all:"Todas as unidades",ZN:"Unidade Norte",ZS:"Unidade Sul",ZO:"Unidade Oeste",ZL:"Unidade Leste"};
+function selectedZone(){return document.getElementById("zoneFilter").value}
+function selectedZoneLabel(){return zoneNames[selectedZone()]||"Todas as unidades"}
+function ownerZone(owner){return team.find(p=>p.name===owner)?.zone||null}
+function filteredTeam(){
+ const z=selectedZone();
+ return z==="all"?team:team.filter(p=>p.zone===z);
+}
+function filteredActionFlow(){ const z=selectedZone(); return z==="all"?actionFlow:actionFlow.filter(a=>a.zone===z); }
+function filteredInitiatives(){
+ const z=selectedZone();
+ return z==="all"?initiatives:initiatives.filter(i=>i.zone===z);
+}
+function scopedPortfolio(){
+ const z=selectedZone();
+ return valuePortfolio.map(p=>{
+   if(z==="all") return {...p,scopedCurrent:p.current,scopedTarget:p.target};
+   const allocation=p.allocations?.[z]||{current:0,target:0};
+   return {...p,scopedCurrent:allocation.current,scopedTarget:allocation.target};
+ }).filter(p=>p.scopedCurrent>0 || linkedActions(p).length>0);
+}
+function filteredRituals(){ const z=selectedZone(); return z==="all"?rituals:rituals.filter(r=>r.zones.includes(z)); }
+function filteredInsightMeetings(){ const z=selectedZone(); return z==="all"?insightMeetings:insightMeetings.filter(m=>m.commitments.some(c=>c.zone===z)); }
+
+function updatePageScopes(){ return; }
+
+function updateGlobalScopeLabel(){ return; }
+function renderOverviewKpis(){
+ const people=filteredTeam().filter(p=>p.name!=="Vaga Aberta");
+ const actions=filteredActionFlow();
+ const fronts=new Set([...filteredInitiatives().map(i=>i.name),...actions.map(a=>a.front)]);
+ const avgLoad=people.length?Math.round(people.reduce((s,p)=>s+p.load,0)/people.length):0;
+ const open=actions.filter(a=>a.status!=="done").length;
+ const onTime=actions.length?Math.round(actions.filter(a=>!a.late).length/actions.length*100):0;
+ document.getElementById("overviewKpis").innerHTML=`
+   <div class="card kpi"><small>Utilização média</small><strong>${avgLoad}%</strong><span>${people.length} pessoa(s) no escopo</span></div>
+   <div class="card kpi"><small>Frentes no escopo</small><strong>${fronts.size}</strong><span>${selectedZoneLabel()}</span></div>
+   <div class="card kpi"><small>Ações abertas</small><strong>${open}</strong><span>${actions.filter(a=>a.priority==="Alta"&&a.status!=="done").length} de alta prioridade</span></div>
+   <div class="card kpi"><small>Ações no prazo</small><strong>${onTime}%</strong><span>${actions.filter(a=>a.late&&a.status!=="done").length} atrasada(s)</span></div>
+ `;
+}
+function applyGlobalFilter(){
+ currentRitual=0;
+ currentInsight=0;
+ renderAll();
+}
+
+function renderCapacity(){
+ const wrap=document.getElementById("capacityRows"); wrap.innerHTML="";
+ filteredTeam().filter(p=>p.name!=="Vaga Aberta").forEach(p=>{
+  wrap.innerHTML+=`<div class="capacity-row"><span>${p.name}</span><div class="bar"><i style="width:${Math.min(p.load*1.8,100)}%"></i></div><b>${p.hours}h</b></div>`;
+ });
+}
+function renderInitiatives(){
+ const list=filteredInitiatives();
+ document.getElementById("initiativeList").innerHTML=list.map(i=>`<div class="initiative"><div><h4>${i.name}</h4><p>${i.hours} · ${i.people}</p></div><span class="pill ${i.status==="Estável"?"good":"warn"}">${i.status}</span></div>`).join("")||`<div class="empty">Nenhuma iniciativa neste filtro.</div>`;
+}
+function stagePct(value,total){return total?Math.max(0,(value/total)*100):0}
+function renderTeam(){
+ document.getElementById("teamGrid").innerHTML=filteredTeam().map(p=>`<article class="card person">
+   <div class="person-head"><div class="avatar">${initials(p.name)}</div><div><h3>${p.name} <span class="pill">${p.zone}</span></h3><small>${p.role}</small></div></div>
+   <div class="person-metrics"><span>${p.initiatives} iniciativas</span><b>${p.hours}h · ${p.load}%</b></div>
+   <div class="stage-bar" title="Esforço planejado por etapa">
+     <i class="stage-backlog" style="width:${stagePct(p.stages.backlog,p.hours)}%"></i>
+     <i class="stage-prioritized" style="width:${stagePct(p.stages.prioritized,p.hours)}%"></i>
+     <i class="stage-doing" style="width:${stagePct(p.stages.doing,p.hours)}%"></i>
+     <i class="stage-validation" style="width:${stagePct(p.stages.validation,p.hours)}%"></i>
+   </div>
+   <div class="stage-mini">
+     <span>Backlog <b>${p.stages.backlog}h</b></span><span>Priorizada <b>${p.stages.prioritized}h</b></span>
+     <span>Em andamento <b>${p.stages.doing}h</b></span><span>Validação <b>${p.stages.validation}h</b></span>
+   </div>
+   <div class="person-alerts">
+     <span class="mini-status ${p.overdue?"late":""}">${p.overdue} atrasada(s)</span>
+     <span class="mini-status">${p.completed} concluídas no ciclo</span>
+     <span class="mini-status">${p.aging} dias médios em backlog</span>
+   </div>
+   <div class="tags">${p.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+   <button class="person-analyze" onclick="openPerson('${p.name}')">Analisar carga e fluxo</button>
+ </article>`).join("");
+}
+let currentDate=Object.keys(meetingsByDate)[0];
+
+function actionById(id){return actionFlow.find(a=>a.id===id)}
+function prepStatusClass(status){
+ if(status==="Atrasada")return "late";
+ if(status==="Concluída")return "done";
+ return "progress";
+}
+function renderRituals(){
+ const scoped=filteredRituals();
+ if(currentRitual>=scoped.length) currentRitual=0;
+ document.getElementById("ritualList").innerHTML=`<h3 style="padding:0 10px 9px">Rituais · ${selectedZoneLabel()}</h3>`+
+ (scoped.length?scoped.map((r,i)=>`<button class="ritual-btn ${i===currentRitual?"active":""}" onclick="selectRitual(${i})">
+   <b>${r.title}</b><span>${r.cadence} · ${r.duration}</span>
+ </button>`).join(""):`<div class="empty">Nenhum ritual relacionado a este recorte.</div>`);
+ if(!scoped.length){
+   document.getElementById("ritualDetail").innerHTML=`<div class="empty">Selecione outra unidade para visualizar os rituais.</div>`;
+   return;
+ }
+ const r=scoped[currentRitual];
+ const z=selectedZone();
+ const linked=r.actionIds.map(actionById).filter(Boolean).filter(a=>z==="all"||a.zone===z);
+ const preparation=z==="all"?r.preparation:r.preparation.filter(p=>p.zone===z);
+ document.getElementById("ritualDetail").innerHTML=`
+   <div class="ritual-title">
+     <div><h3>${r.title}</h3><p>${r.cadence} · ${r.duration} · recorte: ${selectedZoneLabel()}</p></div>
+     <span class="ritual-status">Ritual ativo</span>
+   </div>
+   <div class="ritual-objective"><small>Objetivo do ritual</small><strong>${r.objective}</strong></div>
+   <div class="ritual-grid">
+     <div class="ritual-card"><small>Facilitador</small><strong>${r.facilitator}</strong></div>
+     <div class="ritual-card"><small>Decisor</small><strong>${r.decisionMaker}</strong></div>
+     <div class="ritual-card"><small>Participantes necessários</small><strong>${r.participants}</strong></div>
+     <div class="ritual-card"><small>Decisão esperada</small><strong>${r.expectedDecision}</strong></div>
+   </div>
+   <div class="ritual-section">
+     <h4>Preparação sob responsabilidade do recorte</h4>
+     <div class="prep-list">${preparation.length?preparation.map(p=>`
+       <div class="prep-item"><div><b>${p.label}</b><br><span>Responsável: ${p.owner}</span></div>
+       <span class="commitment-status ${prepStatusClass(p.status)}">${p.status}</span></div>`).join(""):`<div class="empty">Nenhuma preparação atribuída a esta unidade.</div>`}
+     </div>
+   </div>
+   <div class="ritual-section">
+     <h4>Combinados vinculados ao Kanban</h4>
+     <div class="linked-list">${linked.length?linked.map(a=>`
+       <div class="linked-item"><div><b>${a.title}</b><br><span>${a.owner} · prazo ${a.due} · ${a.status}</span></div>
+       <button onclick="highlightAction(${a.id})">Ver ação</button></div>`).join(""):`<div class="empty">Nenhum compromisso deste contexto neste ritual.</div>`}
+     </div>
+   </div>
+   <div class="ritual-footer">
+     <div class="ritual-card"><small>Próximo checkpoint</small><strong>${r.checkpoint}</strong></div>
+     <div class="ritual-card"><small>Evidências para decisão</small><strong>${r.evidence}</strong></div>
+   </div>`;
+}
+function selectRitual(index){currentRitual=index;renderRituals()}
+
+function renderDates(){
+ const dates=Object.keys(meetingsByDate);
+ document.getElementById("dateList").innerHTML=`<h3 style="padding:0 10px">Julho de 2026</h3>`+dates.map(d=>`<div class="date-item ${d===currentDate?"active":""}" onclick="selectDate('${d}')"><span>${d}</span><b>${meetingsByDate[d].length}</b></div>`).join("");
+ document.getElementById("meetingList").innerHTML=`<h3>${currentDate}</h3><div class="sub">Rituais planejados</div>`+meetingsByDate[currentDate].map(m=>`<div class="meeting"><h4>${m[0]}</h4><p>${m[1]} · ${m[2]}</p></div>`).join("");
+}
+function selectDate(d){currentDate=d;renderDates()}
+let currentInsight=0;
+
+function scopedDecision(meeting){
+ const z=selectedZone();
+ if(z==="all") return Object.values(meeting.decisionByZone).join(" ");
+ return meeting.decisionByZone[z]||"Não há decisão específica para este recorte.";
+}
+function scopedRationale(meeting){
+ const z=selectedZone();
+ if(z==="all") return "As decisões foram definidas conforme o contexto, esforço e resultado esperado de cada unidade.";
+ return meeting.rationaleByZone[z]||"Não há justificativa específica para este recorte.";
+}
+
+function commitmentStatusClass(status){
+ if(status==="Atrasada")return "late";
+ if(status==="Concluída")return "done";
+ return "progress";
+}
+function highlightAction(actionId){
+ const action=actionFlow.find(a=>a.id===actionId);
+ if(!action)return;
+ const zone=action.zone;
+ if(selectedZone()!=="all" && selectedZone()!==zone){
+   document.getElementById("zoneFilter").value=zone;
+   applyGlobalFilter();
+ }
+ goTo("overview");
+ setTimeout(()=>{
+  document.querySelector(".flow-panel")?.scrollIntoView({behavior:"smooth",block:"start"});
+  document.querySelectorAll(".action-card").forEach(card=>card.style.outline="");
+  const card=[...document.querySelectorAll(".action-card")].find(c=>c.getAttribute("ondragstart")?.includes(`,${actionId})`));
+  if(card){card.style.outline="3px solid var(--violet)";card.scrollIntoView({behavior:"smooth",block:"center",inline:"center"});}
+ },140);
+}
+
+function renderMeetingKpis(){
+ const meetings=filteredInsightMeetings();
+ const z=selectedZone();
+ const commitments=meetings.flatMap(m=>z==="all"?m.commitments:m.commitments.filter(c=>c.zone===z));
+ const open=commitments.filter(c=>!["Concluída"].includes(c.status)).length;
+ const late=commitments.filter(c=>c.status==="Atrasada").length;
+ const done=commitments.filter(c=>c.status==="Concluída").length;
+ document.getElementById("meetingKpis").innerHTML=`
+   <div class="meeting-kpi"><small>Reuniões analisadas</small><strong>${meetings.length}</strong></div>
+   <div class="meeting-kpi"><small>Combinados abertos</small><strong>${open}</strong></div>
+   <div class="meeting-kpi"><small>Combinados atrasados</small><strong style="color:var(--rose)">${late}</strong></div>
+   <div class="meeting-kpi"><small>Combinados concluídos</small><strong style="color:var(--good)">${done}</strong></div>
+ `;
+}
+
+function renderInsights(){
+ const scoped=filteredInsightMeetings();
+ if(currentInsight>=scoped.length) currentInsight=0;
+ document.getElementById("insightMenu").innerHTML=scoped.length?scoped.map((m,i)=>`<button class="meeting-btn ${i===currentInsight?"active":""}" onclick="selectInsight(${i})"><b>${m.title}</b><span>${m.date}</span></button>`).join(""):`<div class="empty">Nenhuma decisão relacionada a este recorte.</div>`;
+ if(!scoped.length){
+   document.getElementById("insightHeader").innerHTML=`<h3>Sem decisões no recorte</h3><div class="sub">${selectedZoneLabel()}</div>`;
+   ["summary","actions","themes","participation"].forEach(id=>document.getElementById(id).innerHTML=`<div class="empty">Selecione outra unidade.</div>`);
+   return;
+ }
+ const m=scoped[currentInsight];
+ const z=selectedZone();
+ const commitments=z==="all"?m.commitments:m.commitments.filter(c=>c.zone===z);
+ const critical=commitments.find(c=>c.status==="Atrasada")||commitments.find(c=>c.priority==="Alta")||commitments[0];
+ document.getElementById("insightHeader").innerHTML=`<h3>${m.title}</h3><div class="sub">${m.date}</div>
+   <div class="meeting-result">
+     <span>${commitments.length} combinado(s)</span>
+     <span class="late">${commitments.filter(c=>c.status==="Atrasada").length} atrasado(s)</span>
+     <span class="done">${commitments.filter(c=>c.status==="Concluída").length} concluído(s)</span>
+   </div>
+   ${critical?`<div class="critical-commitment"><span class="critical-label">Combinado crítico da ata</span><h4>${critical.text}</h4>
+   <div class="critical-meta"><span>Responsável: <b>${critical.owner}</b></span><span>Prazo: <b>${critical.due}</b></span><span>Frente: <b>${critical.front}</b></span></div></div>`:""}`;
+ document.getElementById("summary").innerHTML=`
+   <div class="decision"><h4>Decisão tomada</h4><p style="font-size:14px;line-height:1.55">${scopedDecision(m)}</p></div>
+   <div class="grid decision-grid" style="margin-top:12px">
+     <div class="decision"><h4>Por que decidimos assim?</h4><p style="font-size:12px;line-height:1.55">${scopedRationale(m)}</p></div>
+     <div class="decision"><h4>Próximo checkpoint</h4><p style="font-size:12px">${m.checkpoint}</p></div>
+   </div>`;
+ document.getElementById("actions").innerHTML=`<div class="commitment-list">${commitments.map(c=>`
+   <div class="commitment"><div><h4>${c.text}</h4><div class="commitment-meta"><span>👤 ${c.owner}</span><span>◆ ${c.front}</span><span>Prazo: ${c.due}</span><span>Prioridade: ${c.priority}</span></div></div>
+   <div class="commitment-side"><span class="commitment-status ${commitmentStatusClass(c.status)}">${c.status}</span><br><button onclick="highlightAction(${c.actionId})">Ver no Kanban</button></div></div>`).join("")||`<div class="empty">Nenhum compromisso deste contexto.</div>`}</div>`;
+ document.getElementById("themes").innerHTML=`<div class="method-card"><span class="method-badge">${m.method}</span><h4>Por que este método?</h4><p style="font-size:13px;line-height:1.6;color:var(--muted)">${m.methodReason}</p></div>`;
+ document.getElementById("participation").innerHTML=`<div class="grid evidence-grid">
+   <div class="decision"><h4>Evidências consideradas</h4><p style="font-size:12px;line-height:1.55">${m.evidence}</p></div>
+   <div class="decision"><h4>Rastreabilidade da ata</h4><p style="font-size:12px;line-height:1.55">${commitments.length} combinado(s) deste contexto com responsável, prazo e acompanhamento no Kanban.</p></div>
+ </div>`;
+}
+function selectInsight(i){currentInsight=i;renderInsights()}
+function renderGovernance(){ return; }
+function toggleAcc(i){document.querySelectorAll(".acc")[i].classList.toggle("open")}
+function goTo(page){
+ document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===page));
+ document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+ const active=[...document.querySelectorAll(".nav button")].find(b=>b.dataset.page===page);
+ document.getElementById("topTitle").textContent=active?active.textContent.trim():"Rotina DX";
+ document.getElementById("sidebar").classList.remove("open");
+ renderAll();
+}
+document.getElementById("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-page]");if(b)goTo(b.dataset.page)});
+document.getElementById("zoneFilter").addEventListener("change",applyGlobalFilter);
+document.getElementById("zoneFilter").addEventListener("input",applyGlobalFilter);
+window.addEventListener("pageshow",()=>setTimeout(applyGlobalFilter,30));
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)applyGlobalFilter();});
+document.getElementById("mobileMenu").onclick=()=>document.getElementById("sidebar").classList.toggle("open");
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+ document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");
+ document.querySelectorAll(".tab-content").forEach(x=>x.classList.remove("active"));document.getElementById(t.dataset.tab).classList.add("active");
+});
+document.getElementById("presentationBtn").onclick=()=>{
+ if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.();
+};
+function openModal(){document.getElementById("modal").classList.add("open")}
+function closeModal(){document.getElementById("modal").classList.remove("open")}
+function openAbout(){document.getElementById("aboutModal").classList.add("open")}
+function closeAbout(){document.getElementById("aboutModal").classList.remove("open")}
+function addInitiative(){
+ const name=document.getElementById("newName").value.trim();
+ if(!name){alert("Digite o nome da iniciativa.");return}
+ initiatives.unshift({name,hours:"0h / sem",people:"Sem owner",status:"Nova",zone:document.getElementById("newZone").value});
+ closeModal();document.getElementById("newName").value="";document.getElementById("zoneFilter").value=document.getElementById("newZone").value;applyGlobalFilter();goTo("overview");
+}
+
+function openPerson(name){
+ const p=team.find(x=>x.name===name); if(!p)return;
+ const notStarted=p.stages.backlog+p.stages.prioritized;
+ const notStartedPct=p.hours?Math.round((notStarted/p.hours)*100):0;
+ let reading="";
+ if(p.overdue>=2 && p.completed>=3){
+   reading=`<b>Leitura gerencial:</b> ${p.name.split(" ")[0]} tem entregas concluídas, portanto o sinal não é baixa produtividade. O risco está na <b>fragmentação da prioridade</b>: ${notStartedPct}% do esforço está em itens ainda não iniciados e há ${p.overdue} combinados atrasados. A decisão recomendada é reduzir WIP, renegociar prazos e retirar itens de menor valor do ciclo.`;
+ }else if(p.stages.doing/p.hours>.48){
+   reading=`<b>Leitura gerencial:</b> a maior parte da capacidade está em execução. O foco deve ser remover impedimentos e evitar iniciar novas ações antes das validações atuais.`;
+ }else{
+   reading=`<b>Leitura gerencial:</b> a distribuição está relativamente equilibrada. O acompanhamento deve preservar o limite de trabalho em andamento e impedir crescimento do backlog.`;
+ }
+ document.getElementById("personModalContent").innerHTML=`
+   <h3>${p.name} · análise de carga e fluxo</h3>
+   <p style="color:var(--muted)">Separação entre esforço planejado, permanência nas etapas e entregas realizadas.</p>
+   <div class="grid workload-summary">
+     <div class="workload-kpi"><small>Esforço semanal</small><strong>${p.hours}h</strong></div>
+     <div class="workload-kpi"><small>Itens atrasados</small><strong style="color:${p.overdue?'var(--rose)':'var(--good)'}">${p.overdue}</strong></div>
+     <div class="workload-kpi"><small>Concluídos no ciclo</small><strong>${p.completed}</strong></div>
+     <div class="workload-kpi"><small>Permanência no backlog</small><strong>${p.aging} dias</strong></div>
+   </div>
+   <div class="grid workload-grid">
+     <div class="stage-detail"><h4>Esforço planejado por etapa</h4>
+       ${[
+        ["Backlog",p.stages.backlog,"stage-backlog"],
+        ["Priorizada",p.stages.prioritized,"stage-prioritized"],
+        ["Em andamento",p.stages.doing,"stage-doing"],
+        ["Em validação",p.stages.validation,"stage-validation"]
+       ].map(s=>`<div class="stage-line"><span>${s[0]}</span><div class="bar"><i class="${s[2]}" style="width:${stagePct(s[1],p.hours)}%"></i></div><b>${s[1]}h</b></div>`).join("")}
+     </div>
+     <div class="manager-reading"><h4>Interpretação para tomada de decisão</h4><p>${reading}</p>
+       <p><b>Pergunta de gestão:</b> “O volume atrasado decorre de falta de capacidade, excesso de WIP, dependência de validação ou prioridade concorrente?”</p>
+     </div>
+   </div>`;
+ document.getElementById("personModal").classList.add("open");
+}
+function closePerson(){document.getElementById("personModal").classList.remove("open")}
+
+function sortTeam(){team.sort((a,b)=>b.load-a.load);renderTeam()}
+renderAll();
+</script>
+</body>
+</html>
